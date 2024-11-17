@@ -9,8 +9,13 @@ public class Obstacle : MonoBehaviour
     private readonly float positionToDestroyWallZ = -2;
     readonly static Color[] wallBodyColors = { Color.red, Color.blue, Color.green, Color.yellow };
 
+    /// <summary>
+    /// Perpetually creates obstacles until the game is over
+    /// </summary>
+    /// <returns></returns>
     public static IEnumerator CreateRoutine()
     {
+        // yield allows the coroutine to pause its operation
         yield return new WaitForSeconds(1);
         while (!GameHandler.Instance.IsGameOver) {
             Create();
@@ -18,6 +23,11 @@ public class Obstacle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Creates the obstacle with the given prefab, set its positions,
+    /// colors it and makes the gap for the bird to fly through,
+    /// each one with its own private method to better separate code
+    /// </summary>
     public static void Create()
     {
         var obstacle = Instantiate(AssetHandler.Instance.obstaclePrefab);
@@ -32,6 +42,11 @@ public class Obstacle : MonoBehaviour
         SetGapPosition(obstacleTransform);
     }
 
+    /// <summary>
+    /// Colors each of the obstacle's walls with random colors
+    /// </summary>
+    /// <param name="leftWall"></param>
+    /// <param name="rightWall"></param>
     private static void SetWallBodyColor(Transform leftWall, Transform rightWall)
     {
         List<Transform> wallBodies = new List<Transform> {
@@ -46,13 +61,22 @@ public class Obstacle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Moves the obstacle's walls in order to make a gap so that the bird can fly through
+    /// </summary>
+    /// <param name="leftWall"></param>
+    /// <param name="rightWall"></param>
     private static void MakeGap(Transform leftWall, Transform rightWall)
     {
-        var gapSize = Random.Range(5, 15);
+        var gapSize = Random.Range(8, 15);
         leftWall.Translate(Vector3.left * gapSize * 0.5f);
         rightWall.Translate(Vector3.right * gapSize * 0.5f);
     }
 
+    /// <summary>
+    /// Randomly rotates the gap vertically or horizontally
+    /// </summary>
+    /// <param name="obstacleTransform"></param>
     private static void SetGapLayout(Transform obstacleTransform)
     {
         var isGapHorizontal = Random.value > 0.5f;
@@ -61,13 +85,21 @@ public class Obstacle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Positions the gap in different places of the screen to provide challenge
+    /// </summary>
+    /// <param name="obstacleTransform"></param>
     private static void SetGapPosition(Transform obstacleTransform)
     {
         var gapPosition = Random.Range(-10, 10);
         obstacleTransform.Translate(Vector3.right * gapPosition);
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Update is called once per frame
+    /// The walls that move, not the bird.
+    /// if the bird passes the wall (if the obstacle is behind the bird), it gets destroyed.
+    /// </summary>
     void Update()
     {
         transform.Translate(Vector3.back * Time.deltaTime * speed, Space.World);
